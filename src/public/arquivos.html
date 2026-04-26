@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>EuroFlow — Arquivos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#060e1c;--surface:#0b1628;--card:#0f1e35;--border:#1a2d4a;--border2:#244069;
+    --accent:#00a651;--accent2:#007d3c;--text:#e4edf8;--muted:#6287a8;
+    --danger:#e05a5a;--success:#4caf7d;--ai:#7c5cbf;--ai2:#9b7de0;
+    --mono:'IBM Plex Mono',monospace;--sans:'Sora',sans-serif;
+    --radius:10px;--tr:0.18s ease;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;overflow-x:hidden}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,166,81,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(0,166,81,.05) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+
+  header{position:relative;z-index:10;border-bottom:1px solid var(--border);background:rgba(13,15,17,.9);backdrop-filter:blur(12px);padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px}
+  .logo{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--accent);display:flex;align-items:center;gap:10px}
+  .logo-dot{width:7px;height:7px;background:var(--accent);border-radius:50%;animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
+  nav{display:flex;gap:4px}
+
+  main{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:40px 24px 80px}
+  .page-label{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px}
+  .page-title{font-size:clamp(22px,3vw,32px);font-weight:600;letter-spacing:-.02em;margin-bottom:6px}
+  .page-title em{font-style:normal;color:var(--accent)}
+  .page-desc{font-size:14px;color:var(--muted);font-weight:300;margin-bottom:36px}
+
+  .layout{display:grid;grid-template-columns:1fr 360px;gap:20px;align-items:start}
+  @media(max-width:860px){.layout{grid-template-columns:1fr}}
+
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;animation:fadeUp .4s ease both}
+  .card:nth-child(2){animation-delay:.08s}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+  .card-header{padding:18px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  .card-icon{width:32px;height:32px;border-radius:8px;background:rgba(0,166,81,.1);border:1px solid rgba(0,166,81,.18);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .card-icon svg{width:15px;height:15px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .card-title{font-size:13px;font-weight:600}
+  .card-sub{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+
+  .search-wrap{padding:16px 22px;border-bottom:1px solid var(--border);position:relative}
+  .search-wrap svg{position:absolute;left:34px;top:50%;transform:translateY(-50%);width:14px;height:14px;stroke:var(--muted);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+  .search-input{width:100%;padding:9px 13px 9px 36px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color var(--tr),box-shadow var(--tr)}
+  .search-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,166,81,.1)}
+  .search-input::placeholder{color:var(--border2)}
+
+  .files-list{padding:10px 0;max-height:calc(100vh - 280px);overflow-y:auto}
+  .files-list::-webkit-scrollbar{width:4px}
+  .files-list::-webkit-scrollbar-track{background:transparent}
+  .files-list::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px}
+
+  .file-item{display:flex;align-items:flex-start;gap:12px;padding:11px 22px;border-bottom:1px solid var(--border);transition:background var(--tr)}
+  .file-item:last-child{border-bottom:none}
+  .file-item:hover{background:rgba(0,60,120,.12)}
+
+  .file-icon{width:34px;height:34px;border-radius:8px;background:rgba(0,166,81,.08);border:1px solid rgba(0,166,81,.14);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+  .file-icon svg{width:14px;height:14px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  .file-info{flex:1;min-width:0}
+  .file-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .file-meta{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:2px}
+
+  .file-actions{display:flex;gap:4px;flex-shrink:0;align-items:flex-start;margin-top:2px}
+  .icon-btn{background:none;border:none;cursor:pointer;color:var(--muted);padding:5px;border-radius:6px;display:flex;transition:color var(--tr),background var(--tr)}
+  .icon-btn:hover{background:rgba(0,60,120,.18)}
+  .icon-btn.danger:hover{color:var(--danger)}
+  .icon-btn.accent:hover{color:var(--accent)}
+  .icon-btn.ai-btn:hover{color:var(--ai2)}
+  .icon-btn.ai-btn.spinning{color:var(--ai2);pointer-events:none}
+  .icon-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .icon-btn.spinning svg{animation:spin .9s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  .empty{padding:40px 22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--border2);letter-spacing:.05em}
+  .list-footer{padding:12px 22px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+
+  /* Tags row */
+  .file-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
+  .file-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:12px;background:rgba(0,166,81,.08);border:1px solid rgba(0,166,81,.18);color:var(--accent)}
+  /* AI-suggested tags look slightly different */
+  .file-tag.ai{background:rgba(124,92,191,.12);border-color:rgba(124,92,191,.3);color:var(--ai2)}
+  .ai-badge{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:10px;background:rgba(124,92,191,.15);border:1px solid rgba(124,92,191,.25);color:var(--ai2);display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
+  .ai-badge svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+  /* AI reason tooltip */
+  .ai-reason{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;padding:4px 8px;background:rgba(124,92,191,.07);border-left:2px solid rgba(124,92,191,.3);border-radius:0 4px 4px 0;display:none}
+  .ai-reason.show{display:block}
+
+  /* Upload side */
+  .upload-zone{margin:20px;border:1.5px dashed var(--border2);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
+  .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(0,166,81,.05)}
+  .upload-zone.drag-over{transform:scale(1.01)}
+  .upload-zone input[type="file"]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0;border:none;background:none}
+  .upload-zone input:focus{outline:none;box-shadow:none}
+  .up-icon{width:44px;height:44px;border-radius:11px;background:rgba(0,166,81,.08);border:1px solid rgba(0,166,81,.15);display:flex;align-items:center;justify-content:center;margin:0 auto 12px;transition:all var(--tr)}
+  .upload-zone:hover .up-icon,.upload-zone.drag-over .up-icon{background:rgba(0,166,81,.15);transform:translateY(-2px)}
+  .up-icon svg{width:20px;height:20px;stroke:var(--accent);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .up-title{font-size:13px;font-weight:500;margin-bottom:3px}
+  .up-hint{font-family:var(--mono);font-size:10px;color:var(--muted)}
+
+  .file-chip{display:none;margin:0 20px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 13px;align-items:center;gap:10px}
+  .file-chip.show{display:flex}
+  .chip-icon{width:30px;height:30px;border-radius:7px;background:rgba(0,166,81,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .chip-icon svg{width:13px;height:13px;stroke:var(--accent);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .chip-info{flex:1;min-width:0}
+  .chip-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chip-size{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:1px}
+  .chip-del{background:none;border:none;cursor:pointer;color:var(--muted);padding:3px;display:flex;border-radius:5px;transition:color var(--tr)}
+  .chip-del:hover{color:var(--danger)}
+  .chip-del svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round}
+
+  .up-fields{padding:0 20px 16px;display:flex;flex-direction:column;gap:12px}
+  .field{display:flex;flex-direction:column;gap:5px}
+  label{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+  input,select{width:100%;padding:10px 13px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);font-family:var(--sans);font-size:13px;outline:none;transition:border-color var(--tr),box-shadow var(--tr);appearance:none}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237a8290' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 11px center;padding-right:34px;cursor:pointer}
+  select option{background:var(--card)}
+  input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,166,81,.11)}
+  input::placeholder{color:var(--border2)}
+
+  .up-footer{padding:0 20px 20px}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:11px 20px;border-radius:var(--radius);font-family:var(--sans);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all var(--tr);width:100%}
+  .btn-primary{background:var(--accent);color:#0d0f11}
+  .btn-primary:hover:not(:disabled){background:var(--accent2);transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,166,81,.22)}
+  .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .btn-loading .btn-text{display:none}
+  .btn-loading .spinner{display:block!important}
+  .spinner{display:none;width:14px;height:14px;border:2px solid rgba(13,15,17,.25);border-top-color:#0d0f11;border-radius:50%;animation:spin .7s linear infinite}
+
+  /* Toast */
+  #toast-container{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+  .toast{display:flex;align-items:flex-start;gap:10px;padding:13px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.5);min-width:260px;max-width:340px;animation:slideIn .25s ease both;pointer-events:all}
+  .toast.out{animation:slideOut .22s ease forwards}
+  @keyframes slideIn{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:translateX(0)}}
+  @keyframes slideOut{to{opacity:0;transform:translateX(18px)}}
+  .toast-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:4px}
+  .toast.success .toast-dot{background:var(--success)}
+  .toast.error   .toast-dot{background:var(--danger)}
+  .toast.info    .toast-dot{background:var(--ai2)}
+  .toast-title{font-size:12px;font-weight:600;margin-bottom:1px}
+  .toast-msg{font-family:var(--mono);font-size:11px;color:var(--muted)}
+
+  .nav-btn{font-family:var(--mono);font-size:11px;text-decoration:none;padding:7px 16px;border-radius:8px;letter-spacing:.04em;transition:all var(--tr);display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border)}
+  .nav-btn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+  .nav-btn.ghost{color:var(--muted);background:transparent}
+  .nav-btn.ghost:hover{color:var(--text);background:rgba(0,60,120,.15);border-color:var(--border2)}
+  .nav-btn.solid{color:#0d0f11;background:var(--accent);border-color:var(--accent)}
+  .nav-btn.solid:hover{background:var(--accent2);border-color:var(--accent2)}
+
+  /* Tag input */
+  .tag-input-wrap{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;cursor:text;transition:border-color var(--tr),box-shadow var(--tr)}
+  .tag-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,166,81,.11)}
+  .tag-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(0,166,81,.12);border:1px solid rgba(0,166,81,.25);color:var(--accent);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px}
+  .tag-chip button{background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;line-height:1;padding:0;display:flex;opacity:.7;transition:opacity var(--tr)}
+  .tag-chip button:hover{opacity:1}
+  .tag-input{background:none;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;min-width:80px;flex:1}
+  .tag-input::placeholder{color:var(--border2)}
+
+  /* Filter chips */
+  .filter-chips{display:flex;gap:6px;flex-wrap:wrap;padding:12px 22px 4px}
+  .filter-chip{font-family:var(--mono);font-size:10px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);color:var(--muted);background:transparent;cursor:pointer;transition:all var(--tr);display:inline-flex;align-items:center;gap:5px}
+  .filter-chip:hover{border-color:var(--border2);color:var(--text)}
+  .filter-chip.active{background:rgba(0,166,81,.12);border-color:rgba(0,166,81,.3);color:var(--accent)}
+  .filter-chip.active::before{content:'✓ ';font-size:9px}
+  .filter-section{padding:4px 22px 10px;border-bottom:1px solid var(--border)}
+  .filter-label{font-family:var(--mono);font-size:9px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><div class="logo-dot"></div>EuroFlow</div>
+  <nav style="display:flex;gap:8px">
+    <a class="nav-btn ghost" href="/cadastro">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Cadastro
+    </a>
+    <a class="nav-btn solid" href="/arquivos">
+      <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      Arquivos
+    </a>
+  </nav>
+</header>
+
+<main>
+  <p class="page-label">// gestão de documentos</p>
+  <h1 class="page-title">Arquivos <em>PDF</em></h1>
+  <p class="page-desc">Visualize documentos, faça upload e classifique automaticamente com IA.</p>
+
+  <div class="layout">
+
+    <!-- ── LEFT: file list ──────────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Documentos disponíveis</div>
+          <div class="card-sub">GET /api/uploads — clique em ✦ para classificar com IA</div>
+        </div>
+      </div>
+
+      <!-- Tag filters -->
+      <div class="filter-section" id="filter-section" style="display:none">
+        <p class="filter-label">Filtrar por tag</p>
+        <div class="filter-chips" id="filter-chips"></div>
+      </div>
+
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="search-input" type="text" id="search" placeholder="Buscar por nome, tag ou funcionário…"/>
+      </div>
+
+      <div class="files-list" id="files-list">
+        <p class="empty" id="list-empty">carregando…</p>
+      </div>
+
+      <div class="list-footer">
+        <span id="list-count" style="color:var(--muted)">—</span>
+        <button onclick="loadFiles()" style="background:none;border:none;cursor:pointer;color:var(--muted);font-family:var(--mono);font-size:10px;display:flex;align-items:center;gap:4px;transition:color var(--tr)" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--muted)'">
+          <svg viewBox="0 0 24 24" style="width:11px;height:11px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          atualizar
+        </button>
+      </div>
+    </div>
+
+    <!-- ── RIGHT: upload form ───────────────────── -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div>
+          <div class="card-title">Upload de documento</div>
+          <div class="card-sub">POST /api/uploads</div>
+        </div>
+      </div>
+
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="pdf-file" accept="application/pdf" aria-label="Selecionar PDF"/>
+        <div class="up-icon">
+          <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+        </div>
+        <p class="up-title">Arraste o PDF aqui</p>
+        <p class="up-hint">ou clique para selecionar · máx. 10 MB</p>
+      </div>
+
+      <div class="file-chip" id="file-chip">
+        <div class="chip-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="chip-info">
+          <div class="chip-name" id="chip-name">—</div>
+          <div class="chip-size" id="chip-size">—</div>
+        </div>
+        <button class="chip-del" id="chip-del" type="button">
+          <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="up-fields">
+        <div class="field">
+          <label for="upload-employee">Vincular a funcionário (opcional)</label>
+          <select id="upload-employee">
+            <option value="">Nenhum</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="upload-desc">Descrição</label>
+          <input type="text" id="upload-desc" placeholder="Ex: Contrato de trabalho"/>
+        </div>
+      </div>
+
+      <div style="padding:0 24px 16px">
+        <div class="field" style="margin:0">
+          <label>Tags</label>
+          <div class="tag-input-wrap" id="tag-input-wrap">
+            <input class="tag-input" id="tag-input" placeholder="Digite e pressione Enter..." autocomplete="off"/>
+          </div>
+          <span style="font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:4px;display:block">Pressione Enter para adicionar</span>
+        </div>
+      </div>
+
+      <div class="up-footer">
+        <button class="btn btn-primary" id="upload-btn" disabled>
+          <svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+          <span class="btn-text">Enviar Documento</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<div id="toast-container"></div>
+
+<script>
+const API = '';
+let allFiles   = [];
+let selectedFile = null;
+let activeTags   = new Set();
+let uploadTags   = [];
+
+// Map of docId → { tags, reason } from AI analysis (in-memory cache)
+const aiResults = {};
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+function toast(type, title, msg) {
+  const c = document.getElementById('toast-container');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<div class="toast-dot"></div><div><div class="toast-title">${title}</div>${msg?`<div class="toast-msg">${msg}</div>`:''}</div>`;
+  c.appendChild(t);
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 230); }, 3800);
+}
+function fmtBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+  return (b/1048576).toFixed(1) + ' MB';
+}
+function fmtDate(str) {
+  return new Date(str).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
+}
+
+// ── Upload tag input ────────────────────────────────────────────────────────
+function renderUploadTags() {
+  const wrap = document.getElementById('tag-input-wrap');
+  wrap.querySelectorAll('.tag-chip').forEach(el => el.remove());
+  const input = document.getElementById('tag-input');
+  uploadTags.forEach(tag => {
+    const chip = document.createElement('span');
+    chip.className = 'tag-chip';
+    chip.innerHTML = `${tag}<button type="button" onclick="removeUploadTag('${tag}')" title="Remover">×</button>`;
+    wrap.insertBefore(chip, input);
+  });
+}
+function addUploadTag(raw) {
+  raw.split(',').map(t => t.trim().toLowerCase()).filter(Boolean).forEach(t => {
+    if (t && !uploadTags.includes(t)) uploadTags.push(t);
+  });
+  renderUploadTags();
+}
+function removeUploadTag(tag) {
+  uploadTags = uploadTags.filter(t => t !== tag);
+  renderUploadTags();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('tag-input');
+  document.getElementById('tag-input-wrap').addEventListener('click', () => input.focus());
+  input.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ',') && input.value.trim()) {
+      e.preventDefault(); addUploadTag(input.value); input.value = '';
+    }
+    if (e.key === 'Backspace' && !input.value && uploadTags.length) {
+      removeUploadTag(uploadTags[uploadTags.length - 1]);
+    }
+  });
+  input.addEventListener('blur', () => {
+    if (input.value.trim()) { addUploadTag(input.value); input.value = ''; }
+  });
+});
+
+// ── AI Analyze ─────────────────────────────────────────────────────────────
+
+// Called right after upload. Retries every 3 s (up to 10×) until
+// Ollama finishes indexing the chunks, then shows the tags automatically.
+async function autoAnalyze(id, attempt = 1) {
+  const MAX_ATTEMPTS = 10;
+  const RETRY_MS     = 3000;
+
+  // Show a pulsing spinner on the analyze button for this doc
+  const btn = document.querySelector(`[data-analyze="${id}"]`);
+  if (btn) btn.classList.add('spinning');
+
+  try {
+    const r = await fetch(`${API}/api/uploads/${id}/analyze`, { method: 'POST' });
+    const d = await r.json();
+
+    if (r.status === 422 && attempt < MAX_ATTEMPTS) {
+      // Not indexed yet — wait and retry
+      setTimeout(() => autoAnalyze(id, attempt + 1), RETRY_MS);
+      return;
+    }
+
+    if (!r.ok) throw new Error(d.message || 'Erro ao analisar');
+
+    aiResults[id] = { tags: d.data.suggested_tags, reason: d.data.reason };
+    renderAiResult(id, d.data.suggested_tags, d.data.reason);
+    toast('success', 'Tags geradas pela IA!', d.data.suggested_tags.join(', '));
+  } catch (err) {
+    // Silently fail for auto-analyze — user can still click manually
+    console.warn('[RAG] auto-analyze failed:', err.message);
+  } finally {
+    if (btn) btn.classList.remove('spinning');
+  }
+}
+
+async function analyzeDoc(id) {
+  const btn = document.querySelector(`[data-analyze="${id}"]`);
+  if (btn) btn.classList.add('spinning');
+
+  toast('info', 'Analisando…', 'A IA está classificando o documento');
+
+  try {
+    const r = await fetch(`${API}/api/uploads/${id}/analyze`, { method: 'POST' });
+    const d = await r.json();
+
+    if (!r.ok) throw new Error(d.message || 'Erro ao analisar');
+
+    // Cache result
+    aiResults[id] = { tags: d.data.suggested_tags, reason: d.data.reason };
+
+    // Update the DOM for this specific file item
+    renderAiResult(id, d.data.suggested_tags, d.data.reason);
+    toast('success', 'Classificado!', d.data.suggested_tags.join(', '));
+  } catch (err) {
+    const msg = err.message.includes('indexado')
+      ? 'Aguarde o processamento do arquivo e tente novamente'
+      : err.message;
+    toast('error', 'Falha na análise', msg);
+  } finally {
+    if (btn) btn.classList.remove('spinning');
+  }
+}
+
+function renderAiResult(id, tags, reason) {
+  const tagsEl   = document.querySelector(`[data-ai-tags="${id}"]`);
+  const reasonEl = document.querySelector(`[data-ai-reason="${id}"]`);
+  if (!tagsEl || !reasonEl) return;
+
+  // Build AI tag chips + badge
+  const badge = `<span class="ai-badge"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>IA</span>`;
+  const chips = tags.map(t => `<span class="file-tag ai">${t}</span>`).join('');
+  tagsEl.innerHTML = badge + chips;
+
+  reasonEl.textContent = '💬 ' + reason;
+  reasonEl.classList.add('show');
+}
+
+// ── Load & render tags (filter chips) ──────────────────────────────────────
+async function loadTags() {
+  try {
+    const r = await fetch(`${API}/api/uploads/tags`);
+    const d = await r.json();
+    renderFilterChips(d.data || []);
+  } catch (_) {}
+}
+
+function renderFilterChips(tags) {
+  const section = document.getElementById('filter-section');
+  const wrap    = document.getElementById('filter-chips');
+  if (!tags.length) { section.style.display = 'none'; return; }
+  section.style.display = 'block';
+  wrap.innerHTML = tags.map(tag =>
+    `<button class="filter-chip${activeTags.has(tag) ? ' active' : ''}"
+             onclick="toggleTagFilter('${tag}')">${tag}</button>`
+  ).join('');
+}
+
+function toggleTagFilter(tag) {
+  activeTags.has(tag) ? activeTags.delete(tag) : activeTags.add(tag);
+  loadFiles();
+}
+
+// ── Load files ─────────────────────────────────────────────────────────────
+async function loadFiles() {
+  try {
+    const params = new URLSearchParams({ limit: 100 });
+    if (activeTags.size) params.set('tags', [...activeTags].join(','));
+    const r = await fetch(`${API}/api/uploads?${params}`);
+    const d = await r.json();
+    allFiles = d.data || [];
+    renderFiles(allFiles);
+    await loadTags();
+  } catch (_) {
+    document.getElementById('list-empty').textContent = '// erro ao carregar arquivos';
+  }
+}
+
+function renderFiles(list) {
+  const container = document.getElementById('files-list');
+  document.getElementById('list-count').textContent =
+    `${list.length} arquivo${list.length !== 1 ? 's' : ''}`;
+
+  if (!list.length) {
+    container.innerHTML = '<p class="empty" id="list-empty">// nenhum documento encontrado</p>';
+    return;
+  }
+
+  container.innerHTML = list.map(doc => {
+    const cachedAi = aiResults[doc.id];
+
+    // Existing tags (manually added)
+    const existingTags = doc.tags && doc.tags.length
+      ? `<div class="file-tags">${doc.tags.map(t => `<span class="file-tag">${t}</span>`).join('')}</div>`
+      : '';
+
+    // AI tags row — starts empty, populated by analyzeDoc()
+    const aiBadge = cachedAi
+      ? `<span class="ai-badge"><svg viewBox="0 0 24 24" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>IA</span>`
+      : '';
+    const aiChips = cachedAi
+      ? cachedAi.tags.map(t => `<span class="file-tag ai">${t}</span>`).join('')
+      : '';
+    const aiReason = cachedAi ? cachedAi.reason : '';
+
+    return `
+      <div class="file-item" data-id="${doc.id}">
+        <div class="file-icon">
+          <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        </div>
+        <div class="file-info">
+          <div class="file-name" title="${doc.original_name}">${doc.original_name}</div>
+          <div class="file-meta">${doc.employee_name ? '→ ' + doc.employee_name + ' · ' : ''}${fmtBytes(doc.size)} · ${fmtDate(doc.uploaded_at)}</div>
+          ${existingTags}
+          <div class="file-tags" data-ai-tags="${doc.id}">${aiBadge}${aiChips}</div>
+          <div class="ai-reason ${cachedAi ? 'show' : ''}" data-ai-reason="${doc.id}">${aiReason ? '💬 ' + aiReason : ''}</div>
+        </div>
+        <div class="file-actions">
+          <button class="icon-btn ai-btn" title="Classificar com IA" data-analyze="${doc.id}"
+                  onclick="analyzeDoc(${doc.id})">
+            <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </button>
+          <a href="${API}/api/uploads/${doc.id}/download" class="icon-btn accent" title="Baixar" onclick="event.stopPropagation()">
+            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          </a>
+          <button class="icon-btn danger" title="Excluir" onclick="deleteFile(${doc.id})">
+            <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ── Search ─────────────────────────────────────────────────────────────────
+document.getElementById('search').addEventListener('input', function() {
+  const q = this.value.toLowerCase();
+  renderFiles(allFiles.filter(f =>
+    f.original_name.toLowerCase().includes(q) ||
+    (f.employee_name || '').toLowerCase().includes(q) ||
+    (f.description   || '').toLowerCase().includes(q) ||
+    (f.tags || []).some(t => t.includes(q))
+  ));
+});
+
+// ── Delete ─────────────────────────────────────────────────────────────────
+async function deleteFile(id) {
+  try {
+    await fetch(`${API}/api/uploads/${id}`, { method: 'DELETE' });
+    delete aiResults[id];
+    toast('success', 'Arquivo removido', 'Documento excluído com sucesso');
+    loadFiles();
+  } catch (_) { toast('error', 'Erro', 'Não foi possível remover'); }
+}
+
+// ── Load employees ──────────────────────────────────────────────────────────
+async function loadEmployees() {
+  try {
+    const r = await fetch(`${API}/api/employees?limit=100&active=true`);
+    const d = await r.json();
+    const sel = document.getElementById('upload-employee');
+    sel.innerHTML = '<option value="">Nenhum</option>';
+    (d.data || []).forEach(e => {
+      const o = document.createElement('option');
+      o.value = e.id; o.textContent = `${e.name} — ${e.department}`;
+      sel.appendChild(o);
+    });
+  } catch (_) {}
+}
+
+// ── File input ──────────────────────────────────────────────────────────────
+const zone      = document.getElementById('upload-zone');
+const fileInput = document.getElementById('pdf-file');
+const chip      = document.getElementById('file-chip');
+const upBtn     = document.getElementById('upload-btn');
+
+function setFile(file) {
+  if (!file) return;
+  if (file.type !== 'application/pdf') { toast('error','Inválido','Apenas PDFs são aceitos'); return; }
+  if (file.size > 10*1024*1024) { toast('error','Muito grande','Máximo 10 MB'); return; }
+  selectedFile = file;
+  document.getElementById('chip-name').textContent = file.name;
+  document.getElementById('chip-size').textContent = fmtBytes(file.size);
+  chip.classList.add('show');
+  upBtn.disabled = false;
+}
+
+fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
+document.getElementById('chip-del').addEventListener('click', () => {
+  selectedFile = null; fileInput.value = '';
+  chip.classList.remove('show'); upBtn.disabled = true;
+});
+zone.addEventListener('dragover',  e => { e.preventDefault(); zone.classList.add('drag-over'); });
+zone.addEventListener('dragleave', ()  => zone.classList.remove('drag-over'));
+zone.addEventListener('drop', e => {
+  e.preventDefault(); zone.classList.remove('drag-over'); setFile(e.dataTransfer.files[0]);
+});
+
+// ── Upload ──────────────────────────────────────────────────────────────────
+upBtn.addEventListener('click', async () => {
+  if (!selectedFile) return;
+  upBtn.disabled = true; upBtn.classList.add('btn-loading');
+  try {
+    const fd   = new FormData();
+    fd.append('file', selectedFile);
+    const emp  = document.getElementById('upload-employee').value;
+    const desc = document.getElementById('upload-desc').value.trim();
+    if (emp)  fd.append('employee_id', emp);
+    if (desc) fd.append('description', desc);
+    if (uploadTags.length) fd.append('tags', uploadTags.join(','));
+
+    const r = await fetch(`${API}/api/uploads`, { method: 'POST', body: fd });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.message || 'Erro no upload');
+
+    toast('success', 'PDF enviado!', 'Classificando com IA…');
+    selectedFile = null; fileInput.value = '';
+    chip.classList.remove('show');
+    document.getElementById('upload-desc').value = '';
+    document.getElementById('upload-employee').value = '';
+    uploadTags = []; renderUploadTags();
+    upBtn.disabled = true;
+    await loadFiles();
+
+    // Auto-analyze: retry until Ollama finishes indexing in the background
+    autoAnalyze(d.data.id);
+  } catch (err) {
+    toast('error', 'Falha no upload', err.message);
+    upBtn.disabled = false;
+  } finally { upBtn.classList.remove('btn-loading'); }
+});
+
+// ── Init ────────────────────────────────────────────────────────────────────
+loadFiles();
+loadEmployees();
+</script>
+</body>
+</html>
