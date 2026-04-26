@@ -94,8 +94,7 @@ API RESTful para **cadastro de funcionários** e **upload de documentos PDF**, c
 ### 1. Clone o repositório
 
 ```bash
-git clone [https://github.com/sua-org/employee-management-api.git](https://github.com/kendydavi/Eurodocs.git)
-cd employee-management-api
+git clone https://github.com/kendydavi/Eurodocs.git
 ```
 
 ### 2. Instale as dependências
