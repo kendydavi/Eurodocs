@@ -25,7 +25,6 @@ function buildApp(db) {
   return app;
 }
 
-// CPFs must match ^\d{3}\.\d{3}\.\d{3}-\d{2}$  → use numeric suffixes
 const validEmployee = (n = 0) => ({
   name:       `Maria Oliveira ${n}`,
   email:      `maria${n}@empresa.com`,
@@ -46,9 +45,8 @@ describe('Employee Routes — Integration', () => {
 
   afterEach(() => db.close());
 
-  // ── POST /api/employees ────────────────────────────────────────────────────
   describe('POST /api/employees', () => {
-    it('201 — creates employee with valid data', async () => {
+    it('201 — cria funcionários com dados corretos', async () => {
       const res = await request(app).post('/api/employees').send(validEmployee(1));
       expect(res.status).toBe(201);
       expect(res.body.success).toBe(true);
@@ -56,30 +54,30 @@ describe('Employee Routes — Integration', () => {
       expect(res.body.data.id).toBeDefined();
     });
 
-    it('400 — rejects missing required fields', async () => {
+    it('400 — envia com campos obrigatórios faltando', async () => {
       const res = await request(app).post('/api/employees').send({ name: 'Só nome' });
       expect(res.status).toBe(400);
       expect(res.body.success).toBe(false);
       expect(res.body.errors).toBeDefined();
     });
 
-    it('400 — rejects invalid CPF format', async () => {
+    it('400 — formato CPF errado', async () => {
       const res = await request(app).post('/api/employees').send({ ...validEmployee(2), cpf: '12345678900' });
       expect(res.status).toBe(400);
     });
 
-    it('400 — rejects invalid email', async () => {
+    it('400 — email inválido', async () => {
       const res = await request(app).post('/api/employees').send({ ...validEmployee(3), email: 'not-an-email' });
       expect(res.status).toBe(400);
     });
 
-    it('409 — rejects duplicate email', async () => {
+    it('409 — email duplicado', async () => {
       await request(app).post('/api/employees').send(validEmployee(4));
       const res = await request(app).post('/api/employees').send({ ...validEmployee(5), email: 'maria4@empresa.com' });
       expect(res.status).toBe(409);
     });
 
-    it('409 — rejects duplicate CPF', async () => {
+    it('409 — CPF duplicado', async () => {
       await request(app).post('/api/employees').send(validEmployee(6));
       const res = await request(app).post('/api/employees').send({ ...validEmployee(7), cpf: '111.222.333-06' });
       expect(res.status).toBe(409);
@@ -93,26 +91,26 @@ describe('Employee Routes — Integration', () => {
       await request(app).post('/api/employees').send(validEmployee(11));
     });
 
-    it('200 — returns paginated list', async () => {
+    it('200 t', async () => {
       const res = await request(app).get('/api/employees');
       expect(res.status).toBe(200);
       expect(res.body.data).toHaveLength(2);
       expect(res.body.total).toBe(2);
     });
 
-    it('200 — filters by department', async () => {
+    it('200 — filtro por departamento', async () => {
       const res = await request(app).get('/api/employees?department=RH');
       expect(res.status).toBe(200);
       expect(res.body.data.every(e => e.department === 'RH')).toBe(true);
     });
 
-    it('200 — search by name', async () => {
+    it('200 — busca por nome', async () => {
       const res = await request(app).get('/api/employees?search=Oliveira');
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
 
-    it('200 — filters active employees', async () => {
+    it('200 — filtro por funcionários ativos', async () => {
       const res = await request(app).get('/api/employees?active=true');
       expect(res.status).toBe(200);
       expect(res.body.data.every(e => e.active === true)).toBe(true);
@@ -121,7 +119,7 @@ describe('Employee Routes — Integration', () => {
 
   // ── GET /api/employees/:id ─────────────────────────────────────────────────
   describe('GET /api/employees/:id', () => {
-    it('200 — returns existing employee', async () => {
+    it('200 — busca funcionário existente', async () => {
       const created = await request(app).post('/api/employees').send(validEmployee(20));
       expect(created.status).toBe(201);
       const res = await request(app).get(`/api/employees/${created.body.data.id}`);
@@ -129,7 +127,7 @@ describe('Employee Routes — Integration', () => {
       expect(res.body.data.id).toBe(created.body.data.id);
     });
 
-    it('404 — returns error for unknown id', async () => {
+    it('404 — Id desconhecido', async () => {
       const res = await request(app).get('/api/employees/9999');
       expect(res.status).toBe(404);
     });
@@ -137,7 +135,7 @@ describe('Employee Routes — Integration', () => {
 
   // ── PATCH /api/employees/:id ───────────────────────────────────────────────
   describe('PATCH /api/employees/:id', () => {
-    it('200 — updates employee fields', async () => {
+    it('200 — atualiza campos de funcionário', async () => {
       const created = await request(app).post('/api/employees').send(validEmployee(30));
       expect(created.status).toBe(201);
       const id = created.body.data.id;
@@ -147,7 +145,7 @@ describe('Employee Routes — Integration', () => {
       expect(res.body.data.salary).toBe(9000);
     });
 
-    it('200 — deactivates employee', async () => {
+    it('200 — desativa funcionário', async () => {
       const created = await request(app).post('/api/employees').send(validEmployee(31));
       expect(created.status).toBe(201);
       const res = await request(app).patch(`/api/employees/${created.body.data.id}`).send({ active: false });
@@ -155,7 +153,7 @@ describe('Employee Routes — Integration', () => {
       expect(res.body.data.active).toBe(false);
     });
 
-    it('404 — returns error for unknown id', async () => {
+    it('404 — erro por id desconhecido', async () => {
       const res = await request(app).patch('/api/employees/9999').send({ role: 'X' });
       expect(res.status).toBe(404);
     });
@@ -163,7 +161,7 @@ describe('Employee Routes — Integration', () => {
 
   // ── DELETE /api/employees/:id ──────────────────────────────────────────────
   describe('DELETE /api/employees/:id', () => {
-    it('200 — deletes existing employee and confirms removal', async () => {
+    it('200 — deleta funcionário existente', async () => {
       const created = await request(app).post('/api/employees').send(validEmployee(40));
       expect(created.status).toBe(201);
       const id = created.body.data.id;
@@ -176,7 +174,7 @@ describe('Employee Routes — Integration', () => {
       expect(check.status).toBe(404);
     });
 
-    it('404 — returns error for unknown id', async () => {
+    it('404 — error por id desconhecido', async () => {
       const res = await request(app).delete('/api/employees/9999');
       expect(res.status).toBe(404);
     });

@@ -16,26 +16,21 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// ─── Pages ────────────────────────────────────────────────────────────────────
 app.get('/', (_, res) => res.redirect('/cadastro'));
 app.get('/cadastro', (_, res) => res.sendFile(path.join(__dirname, 'public', 'cadastro.html')));
 app.get('/arquivos', (_, res) => res.sendFile(path.join(__dirname, 'public', 'arquivos.html')));
 
-// ─── Swagger ──────────────────────────────────────────────────────────────────
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
   customSiteTitle: 'Employee Management API',
   swaggerOptions: { persistAuthorization: true },
 }));
 app.get('/api-docs.json', (_, res) => res.json(swaggerSpec));
 
-// ─── Health ───────────────────────────────────────────────────────────────────
 app.get('/health', (_, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));
 
-// ─── API Routes ───────────────────────────────────────────────────────────────
 app.use('/api/employees', employeeRoutes);
 app.use('/api/uploads',   uploadRoutes);
 
-// ─── Errors ───────────────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(errorHandler);
 

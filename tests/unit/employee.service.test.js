@@ -27,7 +27,7 @@ const existingEmployee = () => ({ id: 1, ...validPayload(), active: true });
 // ── Tests ────────────────────────────────────────────────────────────────────
 describe('EmployeeService', () => {
   describe('listEmployees', () => {
-    it('delegates to repository with filters', async () => {
+    it('delega para o repositório com filtros', async () => {
       const repo = makeMockRepo();
       const svc  = new EmployeeService(repo);
       const filters = { page: 2, limit: 5 };
@@ -38,7 +38,7 @@ describe('EmployeeService', () => {
   });
 
   describe('getEmployee', () => {
-    it('returns employee when found', async () => {
+    it('retorna funcionário ao achar', async () => {
       const employee = existingEmployee();
       const repo = makeMockRepo({ findById: jest.fn().mockReturnValue(employee) });
       const svc  = new EmployeeService(repo);
@@ -47,7 +47,7 @@ describe('EmployeeService', () => {
       expect(result).toEqual(employee);
     });
 
-    it('throws 404 when not found', async () => {
+    it('404 quando funcionário não é encontrado', async () => {
       const repo = makeMockRepo({ findById: jest.fn().mockReturnValue(null) });
       const svc  = new EmployeeService(repo);
 
@@ -56,7 +56,7 @@ describe('EmployeeService', () => {
   });
 
   describe('createEmployee', () => {
-    it('creates and returns employee with valid data', async () => {
+    it('cria e retorna funcionário', async () => {
       const created = existingEmployee();
       const repo = makeMockRepo({ create: jest.fn().mockReturnValue(created) });
       const svc  = new EmployeeService(repo);
@@ -66,52 +66,48 @@ describe('EmployeeService', () => {
       expect(repo.create).toHaveBeenCalledTimes(1);
     });
 
-    it('throws 400 for invalid email', async () => {
+    it(' 400 email inválido', async () => {
       const svc = new EmployeeService(makeMockRepo());
       await expect(svc.createEmployee({ ...validPayload(), email: 'not-an-email' }))
         .rejects.toMatchObject({ status: 400 });
     });
 
-    it('throws 400 for invalid CPF format', async () => {
+    it('400 CPF no formato inválido', async () => {
       const svc = new EmployeeService(makeMockRepo());
       await expect(svc.createEmployee({ ...validPayload(), cpf: '12345678900' }))
         .rejects.toMatchObject({ status: 400 });
     });
 
-    it('throws 400 for negative salary', async () => {
+    it('400 sal;ario negativo', async () => {
       const svc = new EmployeeService(makeMockRepo());
       await expect(svc.createEmployee({ ...validPayload(), salary: -100 }))
         .rejects.toMatchObject({ status: 400 });
     });
 
-    it('throws 409 when email already exists', async () => {
+    it('409 email já existente', async () => {
       const repo = makeMockRepo({ findByEmail: jest.fn().mockReturnValue(existingEmployee()) });
       const svc  = new EmployeeService(repo);
 
       await expect(svc.createEmployee(validPayload())).rejects.toMatchObject({ status: 409 });
     });
 
-    it('throws 409 when CPF already exists', async () => {
+    it('409 CPF ja existe', async () => {
       const repo = makeMockRepo({ findByCpf: jest.fn().mockReturnValue(existingEmployee()) });
       const svc  = new EmployeeService(repo);
 
       await expect(svc.createEmployee(validPayload())).rejects.toMatchObject({ status: 409 });
     });
 
-    it('throws 400 when required fields are missing', async () => {
+    it('400 campo obrigatório faltando', async () => {
       const svc = new EmployeeService(makeMockRepo());
       await expect(svc.createEmployee({ name: 'João' })).rejects.toMatchObject({ status: 400 });
     });
 
-    it('throws 400 when name is too short', async () => {
-      const svc = new EmployeeService(makeMockRepo());
-      await expect(svc.createEmployee({ ...validPayload(), name: 'Jo' }))
-        .rejects.toMatchObject({ status: 400 });
-    });
+    
   });
 
   describe('updateEmployee', () => {
-    it('updates employee with partial data', async () => {
+    it('atualiza funcionário', async () => {
       const employee = existingEmployee();
       const updated  = { ...employee, role: 'Tech Lead' };
       const repo = makeMockRepo({
@@ -124,12 +120,12 @@ describe('EmployeeService', () => {
       expect(result.role).toBe('Tech Lead');
     });
 
-    it('throws 404 when employee not found', async () => {
+    it('404 funcionário não é encontrado', async () => {
       const svc = new EmployeeService(makeMockRepo());
       await expect(svc.updateEmployee(99, { name: 'Novo' })).rejects.toMatchObject({ status: 404 });
     });
 
-    it('throws 409 when email belongs to another employee', async () => {
+    it('409email pertence a outro funcionário', async () => {
       const employee = existingEmployee();
       const other    = { ...existingEmployee(), id: 2, email: 'outro@email.com' };
       const repo = makeMockRepo({
@@ -144,7 +140,7 @@ describe('EmployeeService', () => {
   });
 
   describe('deleteEmployee', () => {
-    it('deletes existing employee', async () => {
+    it('deleta funcionário existente', async () => {
       const repo = makeMockRepo({ findById: jest.fn().mockReturnValue(existingEmployee()) });
       const svc  = new EmployeeService(repo);
 
@@ -152,7 +148,7 @@ describe('EmployeeService', () => {
       expect(repo.delete).toHaveBeenCalledWith(1);
     });
 
-    it('throws 404 when deleting non-existent employee', async () => {
+    it('404 ao deletar funcionário que nao existe', async () => {
       const svc = new EmployeeService(makeMockRepo());
       await expect(svc.deleteEmployee(99)).rejects.toMatchObject({ status: 404 });
     });

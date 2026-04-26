@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>EuroFlow — Arquivos</title>
+<title>EuroDocs — Arquivos</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet"/>
@@ -79,19 +79,17 @@
   .empty{padding:40px 22px;text-align:center;font-family:var(--mono);font-size:11px;color:var(--border2);letter-spacing:.05em}
   .list-footer{padding:12px 22px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10px;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
 
-  /* Tags row */
+
   .file-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px;align-items:center}
   .file-tag{font-family:var(--mono);font-size:9px;padding:2px 7px;border-radius:12px;background:rgba(0,166,81,.08);border:1px solid rgba(0,166,81,.18);color:var(--accent)}
-  /* AI-suggested tags look slightly different */
+
   .file-tag.ai{background:rgba(124,92,191,.12);border-color:rgba(124,92,191,.3);color:var(--ai2)}
   .ai-badge{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:10px;background:rgba(124,92,191,.15);border:1px solid rgba(124,92,191,.25);color:var(--ai2);display:inline-flex;align-items:center;gap:3px;white-space:nowrap}
   .ai-badge svg{width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 
-  /* AI reason tooltip */
   .ai-reason{font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:3px;padding:4px 8px;background:rgba(124,92,191,.07);border-left:2px solid rgba(124,92,191,.3);border-radius:0 4px 4px 0;display:none}
   .ai-reason.show{display:block}
 
-  /* Upload side */
   .upload-zone{margin:20px;border:1.5px dashed var(--border2);border-radius:12px;padding:36px 20px;text-align:center;cursor:pointer;transition:all var(--tr);position:relative;overflow:hidden}
   .upload-zone:hover,.upload-zone.drag-over{border-color:var(--accent);background:rgba(0,166,81,.05)}
   .upload-zone.drag-over{transform:scale(1.01)}
@@ -133,7 +131,7 @@
   .btn-loading .spinner{display:block!important}
   .spinner{display:none;width:14px;height:14px;border:2px solid rgba(13,15,17,.25);border-top-color:#0d0f11;border-radius:50%;animation:spin .7s linear infinite}
 
-  /* Toast */
+
   #toast-container{position:fixed;bottom:24px;right:24px;z-index:1000;display:flex;flex-direction:column;gap:8px;pointer-events:none}
   .toast{display:flex;align-items:flex-start;gap:10px;padding:13px 16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--border);box-shadow:0 12px 40px rgba(0,0,0,.5);min-width:260px;max-width:340px;animation:slideIn .25s ease both;pointer-events:all}
   .toast.out{animation:slideOut .22s ease forwards}
@@ -153,7 +151,6 @@
   .nav-btn.solid{color:#0d0f11;background:var(--accent);border-color:var(--accent)}
   .nav-btn.solid:hover{background:var(--accent2);border-color:var(--accent2)}
 
-  /* Tag input */
   .tag-input-wrap{display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:6px 10px;cursor:text;transition:border-color var(--tr),box-shadow var(--tr)}
   .tag-input-wrap:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px rgba(0,166,81,.11)}
   .tag-chip{display:inline-flex;align-items:center;gap:4px;background:rgba(0,166,81,.12);border:1px solid rgba(0,166,81,.25);color:var(--accent);font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:20px}
@@ -162,7 +159,6 @@
   .tag-input{background:none;border:none;outline:none;color:var(--text);font-family:var(--sans);font-size:13px;min-width:80px;flex:1}
   .tag-input::placeholder{color:var(--border2)}
 
-  /* Filter chips */
   .filter-chips{display:flex;gap:6px;flex-wrap:wrap;padding:12px 22px 4px}
   .filter-chip{font-family:var(--mono);font-size:10px;padding:4px 11px;border-radius:20px;border:1px solid var(--border);color:var(--muted);background:transparent;cursor:pointer;transition:all var(--tr);display:inline-flex;align-items:center;gap:5px}
   .filter-chip:hover{border-color:var(--border2);color:var(--text)}
@@ -175,7 +171,7 @@
 <body>
 
 <header>
-  <div class="logo"><div class="logo-dot"></div>EuroFlow</div>
+  <div class="logo"><div class="logo-dot"></div>EuroDocs</div>
   <nav style="display:flex;gap:8px">
     <a class="nav-btn ghost" href="/cadastro">
       <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -195,7 +191,6 @@
 
   <div class="layout">
 
-    <!-- ── LEFT: file list ──────────────────────── -->
     <div class="card">
       <div class="card-header">
         <div class="card-icon">
@@ -231,7 +226,6 @@
       </div>
     </div>
 
-    <!-- ── RIGHT: upload form ───────────────────── -->
     <div class="card">
       <div class="card-header">
         <div class="card-icon">
@@ -308,8 +302,6 @@ let allFiles   = [];
 let selectedFile = null;
 let activeTags   = new Set();
 let uploadTags   = [];
-
-// Map of docId → { tags, reason } from AI analysis (in-memory cache)
 const aiResults = {};
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -330,7 +322,6 @@ function fmtDate(str) {
   return new Date(str).toLocaleDateString('pt-BR', { day:'2-digit', month:'short', year:'numeric' });
 }
 
-// ── Upload tag input ────────────────────────────────────────────────────────
 function renderUploadTags() {
   const wrap = document.getElementById('tag-input-wrap');
   wrap.querySelectorAll('.tag-chip').forEach(el => el.remove());
@@ -369,10 +360,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
-// ── AI Analyze ─────────────────────────────────────────────────────────────
-
-// Called right after upload. Retries every 3 s (up to 10×) until
-// Ollama finishes indexing the chunks, then shows the tags automatically.
 async function autoAnalyze(id, attempt = 1) {
   const MAX_ATTEMPTS = 10;
   const RETRY_MS     = 3000;
@@ -446,7 +433,6 @@ function renderAiResult(id, tags, reason) {
   reasonEl.classList.add('show');
 }
 
-// ── Load & render tags (filter chips) ──────────────────────────────────────
 async function loadTags() {
   try {
     const r = await fetch(`${API}/api/uploads/tags`);
@@ -471,7 +457,6 @@ function toggleTagFilter(tag) {
   loadFiles();
 }
 
-// ── Load files ─────────────────────────────────────────────────────────────
 async function loadFiles() {
   try {
     const params = new URLSearchParams({ limit: 100 });
@@ -499,12 +484,10 @@ function renderFiles(list) {
   container.innerHTML = list.map(doc => {
     const cachedAi = aiResults[doc.id];
 
-    // Existing tags (manually added)
     const existingTags = doc.tags && doc.tags.length
       ? `<div class="file-tags">${doc.tags.map(t => `<span class="file-tag">${t}</span>`).join('')}</div>`
       : '';
 
-    // AI tags row — starts empty, populated by analyzeDoc()
     const aiBadge = cachedAi
       ? `<span class="ai-badge"><svg viewBox="0 0 24 24" style="width:8px;height:8px;stroke:currentColor;fill:none;stroke-width:2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>IA</span>`
       : '';
@@ -541,7 +524,6 @@ function renderFiles(list) {
   }).join('');
 }
 
-// ── Search ─────────────────────────────────────────────────────────────────
 document.getElementById('search').addEventListener('input', function() {
   const q = this.value.toLowerCase();
   renderFiles(allFiles.filter(f =>
@@ -552,7 +534,6 @@ document.getElementById('search').addEventListener('input', function() {
   ));
 });
 
-// ── Delete ─────────────────────────────────────────────────────────────────
 async function deleteFile(id) {
   try {
     await fetch(`${API}/api/uploads/${id}`, { method: 'DELETE' });
@@ -562,7 +543,6 @@ async function deleteFile(id) {
   } catch (_) { toast('error', 'Erro', 'Não foi possível remover'); }
 }
 
-// ── Load employees ──────────────────────────────────────────────────────────
 async function loadEmployees() {
   try {
     const r = await fetch(`${API}/api/employees?limit=100&active=true`);
@@ -577,7 +557,6 @@ async function loadEmployees() {
   } catch (_) {}
 }
 
-// ── File input ──────────────────────────────────────────────────────────────
 const zone      = document.getElementById('upload-zone');
 const fileInput = document.getElementById('pdf-file');
 const chip      = document.getElementById('file-chip');
@@ -605,7 +584,6 @@ zone.addEventListener('drop', e => {
   e.preventDefault(); zone.classList.remove('drag-over'); setFile(e.dataTransfer.files[0]);
 });
 
-// ── Upload ──────────────────────────────────────────────────────────────────
 upBtn.addEventListener('click', async () => {
   if (!selectedFile) return;
   upBtn.disabled = true; upBtn.classList.add('btn-loading');
@@ -631,7 +609,6 @@ upBtn.addEventListener('click', async () => {
     upBtn.disabled = true;
     await loadFiles();
 
-    // Auto-analyze: retry until Ollama finishes indexing in the background
     autoAnalyze(d.data.id);
   } catch (err) {
     toast('error', 'Falha no upload', err.message);
@@ -639,7 +616,6 @@ upBtn.addEventListener('click', async () => {
   } finally { upBtn.classList.remove('btn-loading'); }
 });
 
-// ── Init ────────────────────────────────────────────────────────────────────
 loadFiles();
 loadEmployees();
 </script>

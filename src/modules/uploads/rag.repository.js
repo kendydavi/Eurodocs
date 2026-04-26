@@ -5,10 +5,7 @@ class RagRepository {
     this.db = db || getDatabase();
   }
 
-  /**
-   * Persist an array of { content, embedding } rows for a document.
-   * Runs inside a single transaction for performance.
-   */
+  
   saveChunks(documentId, chunks) {
     const stmt = this.db.prepare(`
       INSERT INTO document_chunks (document_id, chunk_index, content, embedding)
@@ -22,9 +19,7 @@ class RagRepository {
     insertMany(chunks);
   }
 
-  /**
-   * Retrieve all chunks for a document, with embeddings parsed back to float[].
-   */
+  
   getAllChunks(documentId) {
     return this.db.prepare(`
       SELECT id, chunk_index, content, embedding
@@ -37,18 +32,14 @@ class RagRepository {
     }));
   }
 
-  /**
-   * Remove all chunks for a document (used before re-indexing).
-   */
+
   deleteByDocument(documentId) {
     this.db.prepare(
       'DELETE FROM document_chunks WHERE document_id = ?'
     ).run(documentId);
   }
 
-  /**
-   * Check whether a document has already been indexed.
-   */
+
   isIndexed(documentId) {
     const row = this.db.prepare(
       'SELECT COUNT(*) as count FROM document_chunks WHERE document_id = ?'

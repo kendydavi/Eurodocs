@@ -22,7 +22,7 @@ Sistema completo para cadastro de funcionários e upload de documentos PDF.
     },
     servers: [
       { url: 'http://localhost:3000', description: 'Desenvolvimento' },
-      { url: 'https://api.empresa.com', description: 'Produção' },
+ 
     ],
     components: {
       schemas: {

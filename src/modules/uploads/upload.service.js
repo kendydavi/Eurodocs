@@ -7,17 +7,13 @@ const RagService       = require('./rag.service');
 const getUploadDir    = () => process.env.UPLOAD_DIR || './uploads/pdfs';
 const getMaxSizeBytes = () => (parseInt(process.env.MAX_FILE_SIZE_MB, 10) || 10) * 1024 * 1024;
 
-// Suggested labels passed to the LLM as hints.
 const AVAILABLE_TAGS = [
   'contrato', 'rh', 'financeiro', 'juridico',
   'folha-de-pagamento', 'rescisao', 'beneficios', 'treinamento',
   'advertencia', 'ferias', 'admissao', 'demissao',
 ];
 
-/**
- * Compute a SHA-256 hex digest from a file on disk.
- * Uses streaming so large files don't load entirely into memory.
- */
+
 function hashFile(filePath) {
   return new Promise((resolve, reject) => {
     const hash   = crypto.createHash('sha256');
@@ -44,17 +40,6 @@ class UploadService {
     return doc;
   }
 
-  /**
-   * Upload pipeline (fully synchronous before the document becomes available):
-   *  1. Validate file (mimetype, size)
-   *  2. Compute SHA-256 hash of the file bytes
-   *  3. Persist metadata with hash (status: 'processing')
-   *  4. Index document chunks via RAG (extract → chunk → embed)
-   *  5. Auto-label via LLM → persist tags
-   *  6. Mark document as 'ready' — only now it appears in listings / can be downloaded
-   *
-   * If any step after (3) fails the file is removed and the DB record is deleted.
-   */
   async uploadDocument({ file, employee_id, description, tags = [] }) {
     if (!file) throw Object.assign(new Error('Nenhum arquivo enviado'), { status: 400 });
 
@@ -72,11 +57,9 @@ class UploadService {
       ? tags
       : String(tags).split(',').map(t => t.trim()).filter(Boolean);
 
-    // ── Step 1: Compute SHA-256 hash of the uploaded file ───────────────────
     const filePath = path.join(getUploadDir(), path.basename(file.path));
     const sha256   = await hashFile(filePath);
 
-    // ── Step 2: Persist metadata (with hash) and status='processing' ────────
     const doc = await this.repo.create({
       employee_id:   employee_id ? parseInt(employee_id, 10) : null,
       filename:      path.basename(file.path),
@@ -90,15 +73,12 @@ class UploadService {
     });
 
     try {
-      // ── Step 3: RAG indexing ───────────────────────────────────────────────
       await this.rag.indexDocument(doc.id, filePath);
 
-      // ── Step 4: LLM auto-labeling ──────────────────────────────────────────
       const labelResult = await this.rag.autoLabel(doc.id, AVAILABLE_TAGS);
 
       const mergedTags = [...new Set([...labelResult.tags, ...manualTags])];
 
-      // ── Step 5: Persist tags and mark document as 'ready' ──────────────────
       await this.repo.updateTagsAndStatus(doc.id, mergedTags, 'ready');
 
       return this.repo.findById(doc.id);
@@ -114,10 +94,6 @@ class UploadService {
     }
   }
 
-  /**
-   * Verify that the file on disk still matches its recorded SHA-256 hash.
-   * Returns { ok: true } or { ok: false, stored, actual }.
-   */
   async verifyIntegrity(id) {
     const doc = await this.getDocument(id);
     if (doc.status !== 'ready') {

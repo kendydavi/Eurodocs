@@ -68,7 +68,7 @@ describe('Upload Routes — Integration', () => {
 
   // ── POST /api/uploads ──────────────────────────────────────────────────
   describe('POST /api/uploads', () => {
-    it('201 — uploads a PDF file successfully', async () => {
+    it('201 — upload de PDF feito com sucesso', async () => {
       const p = createTempPdf('up1.pdf');
       const res = await request(app).post('/api/uploads').attach('file', p);
       expect(res.status).toBe(201);
@@ -77,7 +77,7 @@ describe('Upload Routes — Integration', () => {
       fs.unlinkSync(p);
     });
 
-    it('201 — stores tags on upload', async () => {
+    it('201 — armazena tags no upload', async () => {
       const p = createTempPdf('up2.pdf');
       const res = await request(app)
         .post('/api/uploads')
@@ -88,7 +88,7 @@ describe('Upload Routes — Integration', () => {
       fs.unlinkSync(p);
     });
 
-    it('201 — associates PDF with an employee', async () => {
+    it('201 — associa PDF com funcionário', async () => {
       const empId = seedEmployee(db);
       const p = createTempPdf('up3.pdf');
       const res = await request(app)
@@ -100,7 +100,7 @@ describe('Upload Routes — Integration', () => {
       fs.unlinkSync(p);
     });
 
-    it('400 — rejects when no file is sent', async () => {
+    it('400 — PDF sem ser eviado', async () => {
       const res = await request(app).post('/api/uploads').send({});
       expect(res.status).toBe(400);
     });
@@ -108,13 +108,13 @@ describe('Upload Routes — Integration', () => {
 
   // ── GET /api/uploads/tags ──────────────────────────────────────────────
   describe('GET /api/uploads/tags', () => {
-    it('200 — returns empty array when no docs', async () => {
+    it('200 — retorna array nulo', async () => {
       const res = await request(app).get('/api/uploads/tags');
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual([]);
     });
 
-    it('200 — returns tags after upload', async () => {
+    it('200 — tags após o upload', async () => {
       const p = createTempPdf('tag_test.pdf');
       await request(app).post('/api/uploads').attach('file', p).field('tags', 'rh,juridico');
       fs.unlinkSync(p);
@@ -135,25 +135,25 @@ describe('Upload Routes — Integration', () => {
       fs.unlinkSync(p1); fs.unlinkSync(p2);
     });
 
-    it('returns all docs with no tag filter', async () => {
+    it('retorna todos os docs que estáo sem tag', async () => {
       const res = await request(app).get('/api/uploads');
       expect(res.body.total).toBe(2);
     });
 
-    it('filters by single tag', async () => {
+    it('filtra por uma tag', async () => {
       const res = await request(app).get('/api/uploads?tags=rh');
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBe(1);
       expect(res.body.data[0].tags).toContain('rh');
     });
 
-    it('filters by multiple tags (AND logic)', async () => {
+    it('filtra por várias tags', async () => {
       const res = await request(app).get('/api/uploads?tags=contrato,rh');
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBe(1);
     });
 
-    it('returns empty when tag matches nothing', async () => {
+    it('retorna vazio ao não ter match', async () => {
       const res = await request(app).get('/api/uploads?tags=inexistente');
       expect(res.body.data.length).toBe(0);
     });
@@ -161,7 +161,7 @@ describe('Upload Routes — Integration', () => {
 
   // ── GET /api/uploads/:id ───────────────────────────────────────────────
   describe('GET /api/uploads/:id', () => {
-    it('200 — returns document metadata with tags', async () => {
+    it('200 — retorna metadata do documento com tags', async () => {
       const p = createTempPdf('meta.pdf');
       const created = await request(app)
         .post('/api/uploads').attach('file', p).field('tags', 'teste');
@@ -171,14 +171,14 @@ describe('Upload Routes — Integration', () => {
       expect(res.body.data.tags).toContain('teste');
     });
 
-    it('404 — returns error for unknown id', async () => {
+    it('404 —erro por id desconhecido', async () => {
       expect((await request(app).get('/api/uploads/9999')).status).toBe(404);
     });
   });
 
   // ── GET /api/uploads/:id/download ─────────────────────────────────────
   describe('GET /api/uploads/:id/download', () => {
-    it('200 — streams the PDF file', async () => {
+    it('200 — streams arquivo PDF', async () => {
       const p = createTempPdf('dl.pdf');
       const created = await request(app).post('/api/uploads').attach('file', p);
       fs.unlinkSync(p);
@@ -187,14 +187,14 @@ describe('Upload Routes — Integration', () => {
       expect(res.headers['content-disposition']).toBeDefined();
     });
 
-    it('404 — unknown id', async () => {
+    it('404 — id desconhecido', async () => {
       expect((await request(app).get('/api/uploads/9999/download')).status).toBe(404);
     });
   });
 
   // ── DELETE /api/uploads/:id ────────────────────────────────────────────
   describe('DELETE /api/uploads/:id', () => {
-    it('200 — deletes document and confirms removal', async () => {
+    it('200 — deleta documento e notifica sucesso', async () => {
       const p = createTempPdf('del.pdf');
       const created = await request(app).post('/api/uploads').attach('file', p);
       fs.unlinkSync(p);
@@ -204,7 +204,7 @@ describe('Upload Routes — Integration', () => {
       expect((await request(app).get(`/api/uploads/${id}`)).status).toBe(404);
     });
 
-    it('404 — unknown id', async () => {
+    it('404 — id desconhecido', async () => {
       expect((await request(app).delete('/api/uploads/9999')).status).toBe(404);
     });
   });

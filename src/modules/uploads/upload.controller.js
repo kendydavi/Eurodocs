@@ -55,15 +55,6 @@ const UploadController = class {
     } catch (err) { next(err); }
   };
 
-  /**
-   * GET /api/uploads/:id/download
-   *
-   * Sends the PDF file with integrity headers so the client can verify
-   * the download matches the hash recorded at upload time:
-   *
-   *   X-File-Hash:      sha256:<hex>
-   *   X-File-Hash-Algo: SHA-256
-   */
   download = async (req, res, next) => {
     try {
       const doc = await this.service.getDocument(parseInt(req.params.id, 10));
@@ -75,7 +66,6 @@ const UploadController = class {
         });
       }
 
-      // Attach hash headers before streaming the file
       if (doc.sha256) {
         res.setHeader('X-File-Hash',      `sha256:${doc.sha256}`);
         res.setHeader('X-File-Hash-Algo', 'SHA-256');
@@ -85,12 +75,7 @@ const UploadController = class {
     } catch (err) { next(err); }
   };
 
-  /**
-   * GET /api/uploads/:id/verify
-   *
-   * Re-hashes the file on disk and compares it to the stored SHA-256.
-   * Useful for detecting accidental corruption or tampering.
-   */
+
   verify = async (req, res, next) => {
     try {
       const result = await this.service.verifyIntegrity(parseInt(req.params.id, 10));

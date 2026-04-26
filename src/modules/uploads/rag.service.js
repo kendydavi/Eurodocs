@@ -14,13 +14,11 @@ class RagService {
     this.repo = ragRepo || new RagRepository();
   }
 
-  // ── 1. Extract plain text from a PDF file ───────────────────────────────
   async extractText(filePath) {
     const data = await pdf(fs.readFileSync(filePath));
     return data.text || '';
   }
 
-  // ── 2. Split text into overlapping fixed-size chunks ────────────────────
   chunkText(text) {
     const chunks = [];
     let start    = 0;
@@ -32,7 +30,6 @@ class RagService {
     return chunks;
   }
 
-  // ── 3. Embed a single text via Ollama nomic-embed-text ──────────────────
   async _embedOne(text) {
     const res = await fetch(`${OLLAMA_URL}/api/embeddings`, {
       method:  'POST',
@@ -49,7 +46,6 @@ class RagService {
     return data.embedding;
   }
 
-  // Embed multiple texts sequentially in small batches to avoid overloading Ollama
   async embedTexts(texts) {
     const embeddings = [];
     for (const text of texts) {
@@ -58,7 +54,6 @@ class RagService {
     return embeddings;
   }
 
-  // ── 4. Full pipeline: extract → chunk → embed → persist ─────────────────
   async indexDocument(documentId, filePath) {
     const text   = await this.extractText(filePath);
     const chunks = this.chunkText(text);
@@ -82,7 +77,6 @@ class RagService {
     return rows.length;
   }
 
-  // ── 5. Cosine similarity between two float vectors ───────────────────────
   cosineSimilarity(a, b) {
     let dot = 0, magA = 0, magB = 0;
     for (let i = 0; i < a.length; i++) {
@@ -93,7 +87,6 @@ class RagService {
     return dot / (Math.sqrt(magA) * Math.sqrt(magB));
   }
 
-  // ── 6. Semantic search: embed query → rank all chunks by similarity ───────
   async searchChunks(documentId, queryText, topK = 5) {
     const [queryEmbedding] = await this.embedTexts([queryText]);
     return this.repo.getAllChunks(documentId)
@@ -106,7 +99,6 @@ class RagService {
       .slice(0, topK);
   }
 
-  // ── 7. Ask Ollama LLM to classify the document and suggest tags ──────────
   async autoLabel(documentId, availableTags) {
     const chunks = this.repo.getAllChunks(documentId);
 
@@ -122,7 +114,6 @@ class RagService {
       .map(c => c.content)
       .join('\n\n---\n\n');
 
-    // Build hint from existing tags — used as suggestions, not hard constraints
     const tagHint = availableTags.length
       ? `\n\nSuggested labels (use if they fit, otherwise create your own): ${availableTags.join(', ')}`
       : '';
@@ -162,7 +153,6 @@ ${context}`,
       throw new Error('Resposta inválida do modelo de IA');
     }
 
-    // Normalise: lowercase, hyphenated, no spaces
     json.tags = json.tags
       .map(t => String(t).toLowerCase().trim().replace(/\s+/g, '-'))
       .filter(Boolean)
